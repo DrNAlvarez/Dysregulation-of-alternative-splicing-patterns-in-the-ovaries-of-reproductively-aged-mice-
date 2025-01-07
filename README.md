@@ -7,5 +7,16 @@ Aging is associated with widespread changes in cellular splicing patterns, which
 A GTF file generated from FLAIR pipeline analysis is required. https://github.com/BrooksLabUCSC/flair
 Below is the code used for our use case, your requirements may vary.
 
+Note: Directories have been omitted for security reseaons and replaced with generic names.
 
+Note: We joined all the fastq files to generate a experiment specific GTF. 
 
+zcat path/to/fastqs/*.fastq.gz  > all.fastq.gz
+
+flair align -g GRCm38_68.fa -r all.fastq.gz  -o all.flair.aligned -t 120 --nvrna
+
+flair correct --nvrna -gGRCm38_68.fa -q all.flair.aligned.bed -f Mus_musculus.GRCm38.102.gtf -o all.flair -t 120
+
+flair collapse -g GRCm38_68.fa -r all.fastq.gz -q all.correct.flair_all_corrected.bed -f Mus_musculus.GRCm38.102.gtf -o all.flair.collapse --generate_map --annotation_reliant generate -s 1 --temp_dir flair_temp/ --keep_intermediate --check_splice --stringent -t 120
+
+flair quantify -r reads_manifest_all.tsv -i all.flair.collapse.isoforms.fa --generate_map --stringent --check_splice --isoform_bed all.flair.collapse.isoforms.bed --tpm -t 48 --temp_dir tmp/ -o all.flair
