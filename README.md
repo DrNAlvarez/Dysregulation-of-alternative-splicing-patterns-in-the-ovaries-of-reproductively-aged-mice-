@@ -5,6 +5,7 @@ Aging is associated with widespread changes in cellular splicing patterns, which
 # Usage
 
 A GTF file generated from FLAIR pipeline analysis is required. https://github.com/BrooksLabUCSC/flair
+Below is the code used for our use case, your requirements may vary. Adabpt as necessary. 
 
 
 
