@@ -6,7 +6,6 @@ Aging is associated with widespread changes in cellular splicing patterns, which
 Steps
 
 1. Aggregate all fastq data and run flair (https://github.com/BrooksLabUCSC/flair) to generate a single gtf_reference file
-    Run in the Flair conda env.
    
     zcat *.fastq.gz > all.fastq.gz
 
@@ -18,17 +17,15 @@ Steps
 
     flair quantify -r reads_manifest_all.tsv -i all.flair.collapse.isoforms.fa --generate_map --stringent --check_splice --isoform_bed all.flair.collapse.isoforms.bed --tpm -t 120 --temp_dir tmp/ -o coc_all
 
-2. Run bioseq2seq in the Bioseq2seq conda env to translate cDNA into proteins (https://github.com/josephvalencia/bioseq2seq). The output will need to be parsed into a fasta file
+2. Run bioseq2seq to translate cDNA into proteins (https://github.com/josephvalencia/bioseq2seq). The output will need to be parsed into a fasta file
    python ~/bioseq2seq/bin/translate.py --checkpoint ~/bioseq2seq/best_bioseq2seq_mammalian_200-1200.pt --input all.flair.collapse.isoforms.fa --o all.flair.collapse.translation --mode bioseq2seq --num_gpus 1 --beam_size 1 --n_best 1 --max_tokens 1200 --max_decode_len 400
-
-   Run parse_bioseq2seq.py in the R_python conda env.
    
    python parse_bioseq2seq.py -i all.flair.collapse.isoforms_full_preds.txt -o parsed_sequences
 
 
 For Figure 1.
 
-Run the splicing annotation script in the R_python conda env to make a .gtf file with the splicing events annnotated. This will generate files needed for visualization and analysis:
+Run the splicing annotation script to make a .gtf file with the splicing events annnotated. This will generate files needed for visualization and analysis:
    
     all.flair.collapse.isoforms_event_label_promoter_group_data.pkl
     all.flair.collapse.isoforms_event_label.gtf
@@ -37,23 +34,23 @@ Run the splicing annotation script in the R_python conda env to make a .gtf file
     python annotate_gtf_with_splicing.py -o all.flair.collapse.isoforms -p 120 Mus_musculus.GRCm38.102.gtf all.samples.tpm.tsv
 
 
-Run fetch_ensembl_biotype.py R_python conda env to get biotypes for the transcripts annotated in all.flair.collapse.isoforms_event_label.gtf
+Run fetch_ensembl_biotype.py to get biotypes for the transcripts annotated in all.flair.collapse.isoforms_event_label.gtf
 
     python fetch_ensembl_biotype.py --host http://useastdb.ensembl.org --dataset mmusculus_gene_ensembl -o ensembl_mouse_ids.tsv
 
-Run translate_cDNA.py in the R_python conda env to translate all cDNA identified. 
+Run translate_cDNA.py to translate all cDNA identified. 
 
     python check_cdna_translation.py all.flair.collapse.isoforms.pep/parsed_sequences.fasta all.flair.collapse.isoforms.fa translation_start_stops.tsv -p 120
 
-You will now be able to run Figure_1 notebook in the R_python conda env.
+You will now be able to run Figure_1 notebook
 
 For Figure 2. 
 
-Run run_diff_expr.py in the Baysian conda env to generate a data frame of differentially spliced isoforms between two conditions only. If you have more conditions to compare you will have run them in pairs. (A vs B or A vs C ect. For the manuscript we have two condtions a_vs_c (YNG PMSG vs AMA PMSG) and b_vs_d (YNG PMSG+hCG vs AMA PMSG+hCG)
+Run run_diff_expr.py  to generate a data frame of differentially spliced isoforms between two conditions only. If you have more conditions to compare you will have run them in pairs. (A vs B or A vs C ect. For the manuscript we have two condtions a_vs_c (YNG PMSG vs AMA PMSG) and b_vs_d (YNG PMSG+hCG vs AMA PMSG+hCG)
 
     run_diff_expr.py --asevents ASevents_ovary_v4.csv --counts all.samples.counts.tsv --condA 1 2 3 --condB 7 8 9 --groups gene_id promoter_group --nsamples 200 --ntune 200 --cores 8 --out results_splice.csv
 
-You will now be able to run Figure_2 notebook in the R_python conda env it requires the following files
+You will now be able to run Figure_2 notebook, it requires the following files
 
     all.flair.collapse.isoforms.gtf
     results_splice.csv (a_vs_c and b_vs_d)
